@@ -308,32 +308,32 @@ void TBA_FileSystem::readFile(fs::FS &fs, const char *path)
 
 void TBA_FileSystem::debugDirectoryList(File dir, int numTabs)
 {
-
-  while (true)
+   File entry = dir.openNextFile();
+  while (entry)
   {
-    File entry = dir.openNextFile();
-    if (!entry)
-    { // no more files
-      break;
-    }
     for (uint8_t i = 0; i < numTabs; i++)
     {
-      Serial.print('.  ');
+      Serial.print("-->");
     }
+
     if (entry.isDirectory())
     {
+      // directories do not have a size
       Serial.print("/");
       Serial.println(entry.name());
       debugDirectoryList(entry, numTabs + 1);
     }
     else
     {
-      // files have sizes, directories do not
+      // files have size
+      Serial.print(" ");
       Serial.print(entry.size(), DEC);
-      Serial.print("\t\t\t");
+      Serial.print(" bytes\t- ");
       Serial.println(entry.name());
     }
+
     entry.close();
+    entry = dir.openNextFile();
   }
 }
 void TBA_FileSystem::listDirs()
