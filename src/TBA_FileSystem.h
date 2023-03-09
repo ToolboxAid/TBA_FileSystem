@@ -38,6 +38,7 @@
       void SPIFFS2SD(String fileName);
       void get_cardSizeUsed(File dir);
       void setupSD();
+      void setupSD(boolean updateCardInfo);
       void setupSPIFFS();
  //     void memoryInfo();
       void extractGcodeImage(fs::FS &fs, const char * path);
@@ -47,6 +48,8 @@
       void listDirs();
       void removeFile(fs::FS &fs, const char * path);
       void readFile(fs::FS &fs, const char * path);
+
+      File OpenWrite(fs::FS &fs, const char *path);
 
       void renameFile(fs::FS &fs, const char * path1, const char * path2);
 

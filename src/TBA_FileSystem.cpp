@@ -13,6 +13,7 @@
 
 TBA_FileSystem::TBA_FileSystem()
 {
+  Serial.println("TBA_FileSystem::TBA_FileSystem()");
   this->setupSD();
   this->setupSPIFFS();
 }
@@ -156,6 +157,11 @@ void TBA_FileSystem::udpateCardInfo()
 
 void TBA_FileSystem::setupSD()
 {
+  setupSD(false);
+}
+
+void TBA_FileSystem::setupSD(boolean updateCardInfo)
+{
   if (!SD.begin())
   {
     Serial.println("Card Mount Failed");
@@ -186,8 +192,10 @@ void TBA_FileSystem::setupSD()
 
   Serial.printf("SD Card Type: %s\n", stgCardType);
 
-  udpateCardInfo();
-
+  if (updateCardInfo)
+  {
+    udpateCardInfo();
+  }
   //  String rtnVal = supportFunctions.humanReadableSize( cardSize );
   //  Serial.printf("SD Card Size: %s\n", rtnVal);
   //
@@ -203,15 +211,18 @@ void TBA_FileSystem::setupSPIFFS()
   if (!SPIFFS.begin(true))
   {
     Serial.println("An Error has occurred while mounting SPIFFS");
+    // check file system exists
+    if (!SPIFFS.begin())
+    {
+      Serial.println("Formating SPIFFS file system");
+      SPIFFS.format();
+      SPIFFS.begin();
+      if (!SPIFFS.begin(true))
+      {
+        Serial.println("Giving up");
+      }
+    }
     return;
-  }
-
-  // check file system exists
-  if (!SPIFFS.begin())
-  {
-    Serial.println("Formating SPIFFS file system");
-    SPIFFS.format();
-    SPIFFS.begin();
   }
 
   Serial.println("Type: SPDIFF");
@@ -304,11 +315,21 @@ void TBA_FileSystem::readFile(fs::FS &fs, const char *path)
   Serial.print("\n\n\n");
 }
 
+File TBA_FileSystem::OpenWrite(fs::FS &fs, const char *path)
+{
+  File file = fs.open(path, FILE_WRITE);
+  if (!file)
+  {
+    Serial.println("Failed to open file for write");
+  }
+  return file;
+}
+
 // ----------------------- Test only below this line
 
 void TBA_FileSystem::debugDirectoryList(File dir, int numTabs)
 {
-   File entry = dir.openNextFile();
+  File entry = dir.openNextFile();
   while (entry)
   {
     for (uint8_t i = 0; i < numTabs; i++)
